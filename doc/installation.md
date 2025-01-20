@@ -1,4 +1,4 @@
-# Modul: Sistem Presensi Siswa dengan CodeIgniter 3
+# Modul: Sistem Presensi Lab Siswa dengan CodeIgniter 3
 
 ## Pendahuluan
 Sistem Presensi siswa adalah aplikasi yang dirancang untuk mempermudah administrasi pencatatan presensi. Dalam modul ini, kita akan membangun sistem lengkap menggunakan framework PHP **CodeIgniter 3**, untuk templating UI nya kita akan memakai **Bootstrap** & **jQuery**.
