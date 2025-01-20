@@ -1,4 +1,4 @@
-# Modul Tutorial: Sistem Koreksi Nilai Siswa dengan CodeIgniter 3
+# Modul: Sistem Presensi Siswa dengan CodeIgniter 3
 
 ## Pendahuluan
 Sistem koreksi nilai siswa adalah aplikasi yang dirancang untuk mempermudah administrasi nilai, mulai dari input data siswa, soal, hingga proses koreksi dan laporan. Dalam modul ini, kita akan membangun sistem lengkap menggunakan framework PHP **CodeIgniter 3**, untuk templating UI nya kita akan memakai **Bootstrap** & **jQuery**.
