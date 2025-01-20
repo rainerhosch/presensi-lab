@@ -1,16 +1,15 @@
 # Modul: Sistem Presensi Siswa dengan CodeIgniter 3
 
 ## Pendahuluan
-Sistem koreksi nilai siswa adalah aplikasi yang dirancang untuk mempermudah administrasi nilai, mulai dari input data siswa, soal, hingga proses koreksi dan laporan. Dalam modul ini, kita akan membangun sistem lengkap menggunakan framework PHP **CodeIgniter 3**, untuk templating UI nya kita akan memakai **Bootstrap** & **jQuery**.
+Sistem Presensi siswa adalah aplikasi yang dirancang untuk mempermudah administrasi pencatatan presensi. Dalam modul ini, kita akan membangun sistem lengkap menggunakan framework PHP **CodeIgniter 3**, untuk templating UI nya kita akan memakai **Bootstrap** & **jQuery**.
 
 ### Fitur Utama
 - Manajemen pengguna dengan role admin dan guru.
 - Input data siswa, kelas, dan jurusan.
-- Input data mata pelajaran dan soal.
-- Koreksi nilai otomatis berdasarkan jawaban.
-- Download laporan nilai.
+- Perekaman presensi siswa dengan QR-Code.
+- Download laporan laporan presensi.
 
-## Struktur Database untuk Sistem Koreksi Nilai Siswa (Koreksi Asisten)
+## Struktur Database untuk Sistem Presensi Siswa
 
 ### Tahap pertama buat database, sebagai contoh kita akan membuat presensi_siswa_2025
 ```sql
@@ -259,38 +258,39 @@ Berisi kode aplikasi utama.
 #### a. `config/`
 Folder ini menyimpan file konfigurasi.
 - **`autoload.php`**: Memuat library, helper, dan model yang diperlukan.
-- **`config.php`**: Konfigurasi dasar CodeIgniter.
+- **`config.php`**: Konfigurasi dasar aplikasi.
 - **`database.php`**: Konfigurasi koneksi database.
-- **`routes.php`**: Konfigurasi route url.
+- **`routes.php`**: Konfigurasi route URL.
 
 #### b. `controllers/`
 Folder ini berisi file controller yang menangani permintaan dari pengguna.
-- **`Auth.php`**: Mengelola login, logout, dan autentikasi.
+- **`Angkatan.php`**: Mengelola data angkatan.
 - **`Dashboard.php`**: Mengelola halaman utama setelah login.
-- **`Admin.php`**: Mengelola data master (user, kelas, jurusan, dll).
-- **`Guru.php`**: Mengelola data siswa, soal, dan nilai.
+- **`Jurusan.php`**: Mengelola data jurusan.
+- **`Kelas.php`**: Mengelola data kelas.
+- **`Login.php`**: Mengelola proses login dan logout.
+- **`Scan.php`**: Mengelola fitur scan presensi.
+- **`Siswa.php`**: Mengelola data siswa.
+- **`Tahun.php`**: Mengelola data tahun ajaran.
 
 #### c. `models/`
 Folder ini berisi file model untuk manipulasi database.
-- **`Auth_model.php`**: Operasi CRUD untuk tabel `users`.
-- **`Admin_model.php`**: Operasi CRUD untuk data master.
-- **`Guru_model.php`**: Operasi CRUD untuk data siswa, soal, dan hasil ujian.
+- **`MAngkatan.php`**: Operasi CRUD untuk data angkatan.
+- **`MJurusan.php`**: Operasi CRUD untuk data jurusan.
+- **`MKelas.php`**: Operasi CRUD untuk data kelas.
+- **`MLogin.php`**: Operasi autentikasi pengguna.
+- **`MScan.php`**: Operasi terkait scan presensi.
+- **`MSiswa.php`**: Operasi CRUD untuk data siswa.
+- **`MTahun.php`**: Operasi CRUD untuk data tahun ajaran.
 
 #### d. `views/`
 Folder ini menyimpan file tampilan HTML.
-- **`auth/`**: Berisi halaman login.
-  - `login.php`
-- **`dashboard/`**: Berisi halaman utama.
-  - `index.php`
-- **`admin/`**: Berisi halaman untuk admin.
-  - `manage_users.php`
-  - `manage_kelas.php`
-  - `manage_jurusan.php`
-  - `manage_mapel.php`
-- **`guru/`**: Berisi halaman untuk guru.
-  - `manage_siswa.php`
-  - `manage_soal.php`
-  - `manage_nilai.php`
+- **`angkatan.php`**: Tampilan untuk data angkatan.
+- **`dashboard.php`**: Tampilan untuk halaman utama.
+- **`jurusan.php`**: Tampilan untuk data jurusan.
+- **`kelas.php`**: Tampilan untuk data kelas.
+- **`login.php`**: Tampilan untuk halaman login.
+- **`scan.php`**: Tampilan untuk fitur scan presensi.
 
 #### e. `libraries/`
 Custom library untuk fitur tambahan (jika diperlukan).
@@ -313,33 +313,33 @@ Folder untuk file JavaScript.
 Folder untuk menyimpan gambar.
 
 ### 3. `system/`
-Folder inti dari framework CodeIgniter. **Jangan diubah.**
+Folder inti dari framework. **Jangan diubah.**
 
-### 4. `user_guide/`
-Dokumentasi bawaan CodeIgniter.
-
-### 5. `index.php`
+### 4. `index.php`
 File utama untuk bootstrap aplikasi.
 
-### 6. `.htaccess`
+### 5. `.htaccess`
 File konfigurasi server untuk mempermudah URL routing.
 
 ## Alur Pengembangan
 1. **Setup Proyek**
-   - Konfigurasi file `config/config.php` dan `config/database.php`.
+   - Konfigurasi file `application/config/config.php` dan `application/config/database.php`.
    - Pastikan base URL dan database sesuai dengan lingkungan lokal.
 
 2. **Buat Controller**
-   - `Auth.php` untuk autentikasi.
-   - `Admin.php` dan `Guru.php` untuk fitur utama.
+   - `Angkatan.php` untuk data angkatan.
+   - `Jurusan.php` untuk data jurusan.
+   - `Kelas.php` untuk data kelas.
+   - `Login.php` untuk autentikasi.
+   - `Scan.php` untuk fitur scan presensi.
 
 3. **Buat Model**
-   - `Auth_model.php`, `Admin_model.php`, dan `Guru_model.php`.
+   - `MAngkatan.php`, `MJurusan.php`, `MKelas.php`, `MLogin.php`, dan lainnya untuk data yang sesuai.
 
 4. **Buat View**
-   - Halaman login di `views/auth/login.php`.
-   - Halaman dashboard di `views/dashboard/index.php`.
-   - Halaman manajemen data di `views/admin/` dan `views/guru/`.
+   - Halaman login di `application/views/login.php`.
+   - Halaman dashboard di `application/views/dashboard.php`.
+   - Halaman data angkatan, jurusan, kelas, dan siswa di folder yang sesuai.
 
 5. **Tambahkan CSS dan JavaScript**
    - Gunakan file di folder `assets/` untuk desain dan interaktivitas.
@@ -347,117 +347,200 @@ File konfigurasi server untuk mempermudah URL routing.
 6. **Testing dan Deployment**
    - Lakukan pengujian menyeluruh pada fitur aplikasi.
    - Deploy ke server dengan menyesuaikan konfigurasi di `index.php` dan `config.php`.
+   - 
 ## Implementasi Aplikasi
 
-### 1. Controller `Auth.php`
-Controller ini mengelola autentikasi pengguna.
+### Implementasi Aplikasi
 
+Berikut adalah panduan implementasi untuk fitur **Login** dan **Scan** menggunakan arsitektur MVC.
+
+---
+
+## 1. **Implementasi Login**
+
+### a. **Controller**
+File: `application/controllers/Login.php`
 ```php
 <?php
-class Auth extends CI_Controller {
+defined('BASEPATH') OR exit('No direct script access allowed');
 
+class Login extends CI_Controller {
     public function __construct() {
         parent::__construct();
-        $this->load->model('Auth_model');
-        $this->load->library('session');
-        $this->load->helper(['url', 'form']);
+        $this->load->model('MLogin');
     }
 
-    public function login() {
-        if ($this->session->userdata('logged_in')) {
-            redirect('dashboard');
-        }
-
-        $this->load->view('auth/login');
+    public function index() {
+        $this->load->view('login');
     }
 
-    public function login_process() {
+    public function authenticate() {
         $username = $this->input->post('username');
         $password = $this->input->post('password');
 
-        $user = $this->Auth_model->get_user($username);
+        $user = $this->MLogin->check_credentials($username, $password);
 
-        if ($user && password_verify($password, $user['password'])) {
-            $session_data = [
-                'user_id' => $user['id'],
-                'username' => $user['username'],
-                'role' => $user['role'],
-                'logged_in' => TRUE
-            ];
-            $this->session->set_userdata($session_data);
-
+        if ($user) {
+            $this->session->set_userdata('user_data', $user);
             redirect('dashboard');
         } else {
             $this->session->set_flashdata('error', 'Invalid username or password');
-            redirect('auth/login');
+            redirect('login');
         }
     }
 
     public function logout() {
-        $this->session->unset_userdata(['user_id', 'username', 'role', 'logged_in']);
-        $this->session->sess_destroy();
-        redirect('auth/login');
+        $this->session->unset_userdata('user_data');
+        redirect('login');
     }
 }
 ```
 
-### 2. Model `Auth_model.php`
-Model ini mengelola data pengguna.
+---
 
+### b. **Model**
+File: `application/models/MLogin.php`
 ```php
 <?php
-class Auth_model extends CI_Model {
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-    public function __construct() {
-        parent::__construct();
-    }
-
-    public function get_user($username) {
-        $query = $this->db->get_where('users', ['username' => $username]);
-        return $query->row_array();
-    }
-
-    public function create_user($data) {
-        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-        return $this->db->insert('users', $data);
+class MLogin extends CI_Model {
+    public function check_credentials($username, $password) {
+        $this->db->where('username', $username);
+        $this->db->where('password', md5($password)); // Ensure passwords are hashed
+        return $this->db->get('users')->row_array(); // Adjust 'users' to your table name
     }
 }
 ```
 
-### 3. View Halaman Login
-Buat file `login.php` di folder `application/views/auth/`:
+---
 
+### c. **View**
+File: `application/views/login.php`
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
 </head>
 <body>
     <h1>Login</h1>
-    <form action="<?= site_url('auth/login_process'); ?>" method="post">
-        <label>Username:</label>
-        <input type="text" name="username" required><br>
-
-        <label>Password:</label>
-        <input type="password" name="password" required><br>
-
+    <?php if ($this->session->flashdata('error')): ?>
+        <p style="color: red;"><?php echo $this->session->flashdata('error'); ?></p>
+    <?php endif; ?>
+    <form method="POST" action="<?php echo base_url('login/authenticate'); ?>">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+        <br>
         <button type="submit">Login</button>
     </form>
-
-    <?php if ($this->session->flashdata('error')): ?>
-        <p style="color: red;"><?= $this->session->flashdata('error'); ?></p>
-    <?php endif; ?>
 </body>
 </html>
 ```
 
+---
+
+## 2. **Implementasi Scan**
+
+### a. **Controller**
+File: `application/controllers/Scan.php`
+```php
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Scan extends CI_Controller {
+    public function __construct() {
+        parent::__construct();
+        $this->load->model('MScan');
+    }
+
+    public function check_in() {
+        $id_siswa = $this->input->post('id_siswa');
+        $data = [
+            'id_siswa' => $id_siswa,
+            'check_in' => date('Y-m-d H:i:s'),
+        ];
+
+        $this->MScan->save_check_in($data);
+        echo 'Check-in successful!';
+    }
+
+    public function check_out() {
+        $id_siswa = $this->input->post('id_siswa');
+        $data = [
+            'check_out' => date('Y-m-d H:i:s'),
+        ];
+
+        $this->MScan->update_check_out($id_siswa, $data);
+        echo 'Check-out successful!';
+    }
+}
+```
+
+---
+
+### b. **Model**
+File: `application/models/MScan.php`
+```php
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class MScan extends CI_Model {
+    public function save_check_in($data) {
+        $this->db->insert('presensi', $data);
+    }
+
+    public function update_check_out($id_siswa, $data) {
+        $this->db->where('id_siswa', $id_siswa);
+        $this->db->where('check_out', null); // Ensure no duplicate check-outs
+        $this->db->update('presensi', $data);
+    }
+}
+```
+
+---
+
+### c. **View**
+File: `application/views/scan.php`
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan</title>
+</head>
+<body>
+    <h1>Scan Presensi</h1>
+    <form method="POST" action="<?php echo base_url('scan/check_in'); ?>">
+        <label for="id_siswa">ID Siswa:</label>
+        <input type="text" name="id_siswa" id="id_siswa" required>
+        <button type="submit">Check-in</button>
+    </form>
+    <br>
+    <form method="POST" action="<?php echo base_url('scan/check_out'); ?>">
+        <label for="id_siswa">ID Siswa:</label>
+        <input type="text" name="id_siswa" id="id_siswa" required>
+        <button type="submit">Check-out</button>
+    </form>
+</body>
+</html>
+```
+---
+
 ## Kesimpulan
 Dengan mengikuti modul ini, Anda dapat:
-1. Membuat struktur database untuk sistem koreksi nilai siswa.
+1. Membuat struktur database untuk sistem presensi siswa.
 2. Mengelola autentikasi pengguna.
-3. Mengatur data master seperti siswa, kelas, jurusan, dan mata pelajaran.
-4. Mengimplementasikan sistem koreksi nilai.
+3. Mengatur data master seperti siswa, kelas, jurusan, dan data presensi.
+4. Mengimplementasikan sistem presensi dengan konsep Scan QR-Code.
 
+---
+
+Silakan sesuaikan sesuai kebutuhan proyek Anda! Jika ada bagian yang perlu dijelaskan lebih lanjut, beri tahu saya.
 Sistem ini dapat dikembangkan lebih lanjut untuk mendukung fitur tambahan seperti analitik nilai, notifikasi, dan lainnya. Semoga bermanfaat!
