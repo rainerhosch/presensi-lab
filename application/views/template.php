@@ -56,7 +56,7 @@
                         <i class="far fa-user"></i>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                        <span class="dropdown-item dropdown-header">Logout</span>
+                        <a href="<?php echo base_url('/logout'); ?>" class="dropdown-item">Logout</a>
                         <div class="dropdown-divider"></div>
                     </div>
                 </li>

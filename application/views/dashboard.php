@@ -30,7 +30,7 @@
                     <div class="card-body">
                         <div class="tab-content">
                             <div class="tab-pane active" id="tab_1">
-                                Selamat datang di Sistem Presensi Laboratorium SMKN Kiarapedes
+                                Selamat datang di Sistem Presensi Laboratorium SMAN 1 PASAWAHAN
                             </div>
                         </div>
                         <!-- /.tab-content -->

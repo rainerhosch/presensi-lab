@@ -129,7 +129,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form method="post" action="<?= base_url(); ?>/action-simpan-siswa">
+                <form method="post" action="<?= base_url(); ?>action-simpan-siswa">
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="" class="col-form-label">NISN</label>
@@ -140,22 +140,38 @@
                             <input type="text" class="form-control" name="nama" id="siswa-name" required>
                         </div>
                         <div class="form-group">
+                            <label for="siswa-name" class="col-form-label">Alamat Siswa</label>
+                            <input type="text" class="form-control" name="alamat" id="siswa-alamat" required>
+                        </div>
+                        <div class="form-group">
                             <label for="siswa-name" class="col-form-label">Angkatan</label>
                             <select class="form-control" name="angkatan" required>
-                                <option value="">-</option>
+                                <option value="">-- pilih angkatan --</option>
+                                <?php
+                                foreach ($angkatan as $key => $val) { ?>
+                                <option value="<?= $val['id_angkatan']; ?>"><?= $val['nama']; ?></option>
+                                <?php }?>
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label for="siswa-name" class="col-form-label">Kelas</label>
                             <select class="form-control" name="kelas" required>
-                                <option value="">-</option>
+                            <option value="">-- pilih kelas --</option>
+                                <?php
+                                foreach ($kelas as $key => $val) { ?>
+                                <option value="<?= $val['id_kelas']; ?>"><?= $val['nama']; ?></option>
+                                <?php }?>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="siswa-name" class="col-form-label">Jurusan</label>
                             <select class="form-control" name="jurusan" required>
-                                <option value="">-</option>
+                            <option value="">-- pilih jurusan --</option>
+                                <?php
+                                foreach ($jurusan as $key => $val) { ?>
+                                <option value="<?= $val['id_jurusan']; ?>"><?= $val['nama']; ?></option>
+                                <?php }?>
                             </select>
                         </div>
 

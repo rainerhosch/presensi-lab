@@ -14,6 +14,14 @@ class Welcome extends CI_Controller
 	{
 		$this->load->view('login');
 	}
+
+	public function logout()
+	{
+		$this->session->unset_userdata(['username', 'role']);
+        $this->session->sess_destroy();
+        redirect(base_url());
+	}
+
 	public function scan()
 	{
 		// 'tgl_check_in' => date('Y')

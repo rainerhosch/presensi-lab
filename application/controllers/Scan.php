@@ -21,7 +21,7 @@ class Scan extends CI_Controller
 		$format  = date("Y-m-d");
 		$create_at  = date("Y-m-d H:i:s");
 		$nisn = $this->input->post('nisn');
-		$nisn = 12345;
+		// $nisn = 12345;
 
 		$where_ = [
 			'siswa.nisn' => $nisn

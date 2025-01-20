@@ -28,7 +28,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-12">
-                            <h1>Presensi Laboratorium Komputer SMKN Kiarapedes</h1>
+                            <h1>Presensi Laboratorium Komputer SMAN 1 PASAWAHAN</h1>
                         </div>
 
                     </div>

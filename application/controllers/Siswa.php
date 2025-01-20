@@ -8,6 +8,9 @@ class Siswa extends CI_Controller
 	{
 		parent::__construct();
 		$this->load->model('MSiswa');
+		$this->load->model('MJurusan');
+		$this->load->model('MAngkatan');
+		$this->load->model('MKelas');
 		$this->load->library('form_validation');
 		if ($this->session->userdata('role') == 'admin') {
 		} else {
@@ -20,6 +23,9 @@ class Siswa extends CI_Controller
 	{
 		$data['title']   = 'Data Siswa';
 		$data['content'] = 'siswa';
+		$data['kelas']   = $this->MKelas->getKelas();
+		$data['jurusan']   = $this->MJurusan->getJurusan();
+		$data['angkatan']   = $this->MAngkatan->getangkatan();
 		$data['siswa']   = $this->MSiswa->getSiswa([]);
 		// echo '<pre>';
 		// print_r($data['siswa']);
@@ -31,13 +37,26 @@ class Siswa extends CI_Controller
 
 	public function action_simpan()
 	{
+		$this->form_validation->set_rules('nisn', 'Nisn', 'required');
 		$this->form_validation->set_rules('nama', 'Nama', 'required');
-		$this->form_validation->set_rules('status', 'Status', 'required');
+		$this->form_validation->set_rules('alamat', 'Alamat', 'required');
+		$this->form_validation->set_rules('angkatan', 'Angkatan', 'required');
+		$this->form_validation->set_rules('kelas', 'Kelas', 'required');
+		$this->form_validation->set_rules('jurusan', 'Jurusan', 'required');
 		if ($this->form_validation->run() == TRUE) {
+			$data['post']	= $this->input->post();
 
-			$data['post']['nama']   = $this->input->post('nama');
-			$data['post']['status'] = $this->input->post('status');
-			$hasil = $this->MSiswa->insert(['nama' => $data['post']['nama'], 'status' => $data['post']['status']]);
+			$data_insert	= [
+				'nisn'			=> $data['post']['nisn'],	
+				'nama'			=> $data['post']['nama'],
+				'id_angkatan'	=> $data['post']['angkatan'],
+				'id_kelas'		=> $data['post']['kelas'],
+				'id_jurusan'	=> $data['post']['jurusan'],
+				'alamat'		=> $data['post']['alamat'],
+				'status'		=> 1,
+			];
+			
+			$hasil = $this->MSiswa->insert($data_insert);
 			if ($hasil == true) {
 				$this->session->set_flashdata('notif', 'Data Berhasil disimpan');
 			} else {
