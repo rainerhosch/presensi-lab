@@ -361,39 +361,46 @@ Berikut adalah panduan implementasi untuk fitur **Login** dan **Scan** menggunak
 ### a. **Controller**
 File: `application/controllers/Login.php`
 ```php
-<?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+    <?php
+    defined('BASEPATH') or exit('No direct script access allowed');
 
-class Login extends CI_Controller {
-    public function __construct() {
-        parent::__construct();
-        $this->load->model('MLogin');
-    }
+    class Login extends CI_Controller
+    {
+        public function __construct()
+        {
+            parent::__construct();
+            $this->load->model('MLogin');
+            $this->load->library('form_validation');
+        }
 
-    public function index() {
-        $this->load->view('login');
-    }
-
-    public function authenticate() {
-        $username = $this->input->post('username');
-        $password = $this->input->post('password');
-
-        $user = $this->MLogin->check_credentials($username, $password);
-
-        if ($user) {
-            $this->session->set_userdata('user_data', $user);
-            redirect('dashboard');
-        } else {
-            $this->session->set_flashdata('error', 'Invalid username or password');
-            redirect('login');
+        public function action()
+        {
+            $this->form_validation->set_rules('username', 'Username', 'required|trim');
+            $this->form_validation->set_rules('password', 'Password', 'required|trim|alpha_numeric');
+            if ($this->form_validation->run() == TRUE) {
+                $username = $this->input->post('username');
+                $pass = md5($this->input->post('password'));
+                $data_db = $this->MLogin->cek_login(['username' => $username, 'password' => $pass]);
+                // var_dump($data_db);
+                // exit;
+                if (!empty($data_db)) {
+                    $data_sesi = [
+                        'username' => $username,
+                        'role' => $data_db['role']
+                    ];
+                    $this->session->set_userdata($data_sesi);
+                    redirect(base_url('dashboard'));
+                } else {
+                    $this->session->set_flashdata('notif', "<div class='alert alert-danger alert-dismissible'><button type='button' class='close' data dismiss='alert' aria-hidden='true'>&times;</button> <h4><i class='icon fa fa-warning'></i> Alert!</h4> Username/Passwords Salah</div>");
+                    redirect(base_url('login'));
+                }
+            } else {
+                $this->session->set_flashdata('notif', "<div class='alert alert-danger alert-dismissible'><button type='button' class='close' data dismiss='alert' aria-hidden='true'>&times;</button> <h4><i class='icon fa fa-warning'></i> Alert!</h4> Salah input data</div>");
+                redirect(base_url('login'));
+            }
         }
     }
 
-    public function logout() {
-        $this->session->unset_userdata('user_data');
-        redirect('login');
-    }
-}
 ```
 
 ---
@@ -401,16 +408,19 @@ class Login extends CI_Controller {
 ### b. **Model**
 File: `application/models/MLogin.php`
 ```php
-<?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+    <?php
+    defined('BASEPATH') or exit('No direct script access allowed');
 
-class MLogin extends CI_Model {
-    public function check_credentials($username, $password) {
-        $this->db->where('username', $username);
-        $this->db->where('password', md5($password)); // Ensure passwords are hashed
-        return $this->db->get('users')->row_array(); // Adjust 'users' to your table name
+    class MLogin extends CI_Model
+    {
+        public function cek_login($where)
+        {
+            $this->db->select('*');
+            $this->db->from('admin');
+            $this->db->where($where);
+            return $this->db->get()->row_array();
+        }
     }
-}
 ```
 
 ---
@@ -420,26 +430,80 @@ File: `application/views/login.php`
 ```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Log In</title>
+
+	<!-- Google Font: Source Sans Pro -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="assets/AdminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css">
+	<!-- icheck bootstrap -->
+	<link rel="stylesheet" href="assets/AdminLTE-3.2.0/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+	<!-- Theme style -->
+	<link rel="stylesheet" href="assets/AdminLTE-3.2.0/dist/css/adminlte.min.css">
 </head>
-<body>
-    <h1>Login</h1>
-    <?php if ($this->session->flashdata('error')): ?>
-        <p style="color: red;"><?php echo $this->session->flashdata('error'); ?></p>
-    <?php endif; ?>
-    <form method="POST" action="<?php echo base_url('login/authenticate'); ?>">
-        <label for="username">Username:</label>
-        <input type="text" name="username" id="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" id="password" required>
-        <br>
-        <button type="submit">Login</button>
-    </form>
+
+<body class="hold-transition login-page">
+	<div class="login-box">
+		<!-- /.login-logo -->
+		<div class="card card-outline card-primary">
+			<div class="card-header text-center">
+				<a href="assets/AdminLTE-3.2.0/index2.html" class="h1"><b>Login</b> Admin LAB</a>
+			</div>
+			<div class="card-body">
+				<p class="login-box-msg">Sign in to start your session</p>
+
+				<form action="action-login" method="post">
+					<div class="input-group mb-3">
+						<input type="username" name="username" class="form-control" placeholder="Username">
+						<div class="input-group-append">
+							<div class="input-group-text">
+								<span class="fas fa-user"></span>
+							</div>
+						</div>
+					</div>
+					<div class="input-group mb-3">
+						<input type="password" name="password" class="form-control" placeholder="Password">
+						<div class="input-group-append">
+							<div class="input-group-text">
+								<span class="fas fa-lock"></span>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-8">
+
+						</div>
+						<!-- /.col -->
+						<div class="col-4">
+							<button type="submit" class="btn btn-primary btn-block">Sign In</button>
+						</div>
+						<!-- /.col -->
+					</div>
+				</form>
+
+
+				<!-- /.social-auth-links -->
+
+
+			</div>
+			<!-- /.card-body -->
+		</div>
+		<!-- /.card -->
+	</div>
+	<!-- /.login-box -->
+
+	<!-- jQuery -->
+	<script src="assets/AdminLTE-3.2.0/plugins/jquery/jquery.min.js"></script>
+	<!-- Bootstrap 4 -->
+	<script src="assets/AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<!-- AdminLTE App -->
+	<script src="assets/AdminLTE-3.2.0/dist/js/adminlte.min.js"></script>
 </body>
+
 </html>
 ```
 
@@ -451,34 +515,226 @@ File: `application/views/login.php`
 File: `application/controllers/Scan.php`
 ```php
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Scan extends CI_Controller {
-    public function __construct() {
-        parent::__construct();
-        $this->load->model('MScan');
-    }
+class Scan extends CI_Controller
+{
 
-    public function check_in() {
-        $id_siswa = $this->input->post('id_siswa');
-        $data = [
-            'id_siswa' => $id_siswa,
-            'check_in' => date('Y-m-d H:i:s'),
-        ];
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('MScan', 'Scan');
+		$this->load->library('form_validation');
+	}
 
-        $this->MScan->save_check_in($data);
-        echo 'Check-in successful!';
-    }
+	public function action_simpan()
+	{
+		// MHS
+		$manif = 0;
+		$insertV = 0;
+		$manif_out = 0;
+		$jam_now = date("H:i:s");
+		$format  = date("Y-m-d");
+		$create_at  = date("Y-m-d H:i:s");
+		$nisn = $this->input->post('nisn');
+		// $nisn = 12345;
 
-    public function check_out() {
-        $id_siswa = $this->input->post('id_siswa');
-        $data = [
-            'check_out' => date('Y-m-d H:i:s'),
-        ];
+		$where_ = [
+			'siswa.nisn' => $nisn
+		];
 
-        $this->MScan->update_check_out($id_siswa, $data);
-        echo 'Check-out successful!';
-    }
+		$cek  = $this->Scan->cek($where_);
+		if ($cek > 0) {
+			$where_presensi = [
+				'id_siswa' => $cek['id_siswa'],
+				'tgl_check_out' => '0000-00-00'
+			];
+
+			$where_max = [
+				'id_siswa' => $cek['id_siswa']
+			];
+
+			$cek_max_id = $this->Scan->cek_last_absen($where_presensi);
+
+			if (empty($cek_max_id)) {
+				$cek_max_id['id_presensi'] = null;
+				$cek_max_id['tgl_check_in'] = null;
+				$cek_max_id['jam_check_in'] = null;
+				$cek_max_id['tgl_check_out'] = null;
+				$cek_max_id['jam_check_out'] = null;
+			}
+			$cek_last_absen = $this->Scan->cek_last_absen($where_max);
+			if (empty($cek_last_absen)) {
+
+				$cek_max_id['id_presensi'] = null;
+				$cek_last_absen['tgl_check_in'] = null;
+				$cek_last_absen['jam_check_in'] = null;
+				$cek_last_absen['tgl_check_out'] = null;
+				$cek_last_absen['jam_check_out'] = null;
+			}
+
+			$create_at_last = $cek_last_absen['tgl_check_in'] . ' ' . $cek_last_absen['jam_check_in'];
+
+			$checkout_last = $cek_last_absen['tgl_check_out'] . ' ' . $cek_last_absen['jam_check_out'];
+			$diff  = date_diff(date_create($create_at_last), date_create());
+			$dataJam =  $diff->d . ' hari, ' . $diff->h . ' jam, ' . $diff->i . ' menit, ' . $diff->s . ' detik, ';
+			$diff_mulai  = date_diff(date_create($checkout_last), date_create());
+			$dataJam_mulai =  $diff_mulai->d . ' hari, ' . $diff_mulai->h . ' jam, ' . $diff_mulai->i . ' menit, ' . $diff_mulai->s . ' detik, ';
+			$checkout_last2 = $cek_max_id['tgl_check_out'] . ' ' . $cek_max_id['jam_check_out'];
+			$diff_mulai2  = date_diff(date_create($checkout_last2), date_create());
+
+			// ABSEN TERAKHIR
+			if ($cek_last_absen !== null && $cek_last_absen['tgl_check_out'] == '0000-00-00') {
+
+				//UPDATE CHECKOUT
+
+				if ($diff->d < 1 && ($diff->i >= 1 && $diff->h >= 0 && $diff->h <= 16)) {
+					$data_jam = [
+						'tgl_check_out' => $format,
+						'jam_check_out' => $jam_now
+					];
+					$prosesUpdate = $this->Scan->update_absen(['id_presensi' => $cek_last_absen['id_presensi']], $data_jam);
+					// JIKA BERHASIL
+					if ($prosesUpdate > 0) {
+						$data = 'Terima kasih';
+						$status = 2;
+						$manif_out = 1;
+					} else {
+						$data = 'Tidak Tersimpan';
+						$status = 0;
+					}
+					// JIKA 24 JAM BELUM CHECKOUT
+				} else if ($diff->d > 0) {
+					$times = $cek_last_absen['tgl_check_in'] . ' ' . $cek_last_absen['jam_check_in'];
+					$dt = new DateTime($times);
+					$dt->modify('+ 1 hour');
+					$tglk = date_format($dt, "Y-m-d");
+					$jamk = date_format($dt, "H:i:s");
+					$data_jam = [
+						'tgl_check_out' => $tglk,
+						'jam_check_out' => $jamk
+					];
+					$prosesUpdate = $this->Scan->update_absen(['id_presensi' => $cek_last_absen['id_presensi']], $data_jam);
+					if ($prosesUpdate > 0) {
+						$data = 'Checkout kemarin, Silahkan Scan lagi...';
+						$status = 6;
+						$manif_out = 1;
+					} else {
+						$data = 'Tidak Tersimpan';
+						$status = 0;
+					}
+					//JIKA BELUM CHECK OUT
+				} else if ($diff->d > 0 && $diff->h > 15) {
+					$times = $cek_last_absen['tgl_check_in'] . ' ' . $cek_last_absen['jam_check_in'];
+					$dt = new DateTime($times);
+					$dt->modify('+ 1 hour');
+					$tglk = date_format($dt, "Y-m-d");
+					$jamk = date_format($dt, "H:i:s");
+					$data_jam = [
+						'tgl_check_out' => $tglk,
+						'jam_check_out' => $jamk
+					];
+					$prosesUpdate = $this->Scan->update_absen(['id_presensi' => $cek_last_absen['id_presensi']], $data_jam);
+					if ($prosesUpdate > 0) {
+						$data = 'Checkout kemarin, Silahkan Scan lagi...';
+						$status = 6;
+						$manif_out = 1;
+					} else {
+						$data = 'Tidak Tersimpan';
+						$status = 0;
+					}
+					//JIKA BELUM CHECK OUT
+				} else if ($diff->d < 1 && $diff->h > 15) {
+					$times = $cek_last_absen['tgl_check_in'] . ' ' . $cek_last_absen['jam_check_in'];
+					$dt = new DateTime($times);
+					$dt->modify('+ 1 hour');
+					$tglk = date_format($dt, "Y-m-d");
+					$jamk = date_format($dt, "H:i:s");
+					$data_jam = [
+						'tgl_check_out' => $tglk,
+						'jam_check_out' => $jamk
+					];
+					$prosesUpdate = $this->Scan->update_absen(['id_absensi' => $cek_last_absen['id_presensi']], $data_jam);
+					if ($prosesUpdate > 0) {
+						$data = 'Checkout kemarin, Silahkan Scan lagi...';
+						$status = 6;
+						$manif_out = 1;
+					} else {
+						$data = 'Tidak Tersimpan';
+						$status = 0;
+					}
+					//JIKA BELUM PULANG
+				} else {
+					$data = 'Tunggu satu menit...';
+					$status = 3;
+				}
+				//JIKA ABSEN BELUM PERNAH DIBUAT 
+			} else {
+				//JIKA SUDAH ABSEN HARI INI 1 MENIT
+				if ($cek_max_id['id_presensi'] !== null && $diff_mulai2->d < 1 && $diff_mulai2->h < 1 && $diff_mulai2->i < 1) {
+					$create_last_w = $cek_max_id['tgl_check_in'] . ' ' . $cek_max_id['jam_check_in'];
+					$checkout_last_w  = $cek_max_id['tgl_check_out'] . ' ' . $cek_max_id['jam_check_out'];
+					$diff  = date_diff(date_create($checkout_last_w), date_create($create_last_w));
+					$dataJam =  $diff->d . ' hari, ' . $diff->h . ' jam, ' . $diff->i . ' menit, ' . $diff->s . ' detik, ';
+					$data = 'Sudah mengisi list...';
+					$status = 4;
+					// BATAS CEK IN
+				} else {
+					$where_data = [
+						'id_siswa'  => $cek['id_siswa'],
+						'id_tahun_ajaran'  => 2025,
+						'tgl_check_in'  => $format,
+						'jam_check_in'  => $jam_now,
+						'tgl_check_out' => '',
+						'jam_check_out' => ''
+					];
+					$prosesInsert = $this->Scan->insert_absen($where_data);
+					$dataJam = '-';
+					$data    = 'Scan Tersimpan.';
+					$status  = 1;
+					$manif   = 1;
+					$insertV = 1;
+				}
+			}
+
+			//MANIPULASI WAKTU
+			if ($manif == 1) {
+				$awalW = $create_at;
+			} else {
+				$awalW = $cek_last_absen['tgl_check_in'] . ' ' . $cek_last_absen['jam_check_in'];
+			}
+
+			if ($insertV == 1) {
+				$akhirW = '-';
+			} else {
+				if ($cek_last_absen['tgl_check_out'] != '0000-00-00') {
+					$akhirW = $cek_last_absen['tgl_check_out'] . ' ' . $cek_last_absen['jam_check_out'];
+				} else {
+					$akhirW = $manif_out == 1 ? $create_at : '-';
+				}
+			}
+			//END MANIPULASI WAKTU
+
+			// ENCODE JSON
+			$Edata = [
+				'notif' => $data,
+				'nisn' => $cek['nisn'],
+				'nama' => $cek['nama'],
+				'status' => $status,
+				'dataJam_mulai' => $dataJam_mulai,
+				'dataJam' => $dataJam,
+				'sql' => $cek_last_absen,
+				'awal' => $awalW,
+				'akhir' => $akhirW,
+				'max' => $cek_max_id
+			];
+		} else {
+			$Edata = [
+				'error' => 1
+			];
+		}
+		echo json_encode($Edata);
+	}
 }
 ```
 
@@ -488,17 +744,56 @@ class Scan extends CI_Controller {
 File: `application/models/MScan.php`
 ```php
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
-
-class MScan extends CI_Model {
-    public function save_check_in($data) {
-        $this->db->insert('presensi', $data);
+defined('BASEPATH') or exit('No direct script access allowed');
+date_default_timezone_set('Asia/Jakarta');
+class MScan extends CI_Model
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->database();
+    }
+    public function cek($where)
+    {
+        $this->db->select('*');
+        $this->db->from('siswa');
+        // $this->db->join('siswa', 'siswa.id_siswa = presensi.id_siswa');
+        $this->db->where($where);
+        return $this->db->get()->row_array();
     }
 
-    public function update_check_out($id_siswa, $data) {
-        $this->db->where('id_siswa', $id_siswa);
-        $this->db->where('check_out', null); // Ensure no duplicate check-outs
-        $this->db->update('presensi', $data);
+    public function cek_last_absen($where)
+    {
+        $this->db->select('*');
+        $this->db->from('presensi');
+        $this->db->where($where);
+        $this->db->order_by('id_presensi', 'DESC');
+        $this->db->limit(1);
+        // ORDER BY id DESC LIMIT 0, 1
+        return $this->db->get()->row_array();
+    }
+
+    public function update_absen($where, $data)
+    {
+        $this->db->update('presensi', $data, $where);
+        return $this->db->affected_rows();
+    }
+    public function insert_absen($data)
+    {
+        $this->db->insert('presensi', $data);
+        return $this->db->affected_rows();
+    }
+
+    public function data_presensi($where)
+    {
+        $this->db->select('siswa.*, kelas.nama AS kelas, jurusan.nama AS jurusan, presensi.tgl_check_in, presensi.jam_check_in, presensi.tgl_check_out, presensi.jam_check_out');
+        $this->db->from('presensi');
+        $this->db->join('siswa', 'siswa.id_siswa = presensi.id_siswa');
+        $this->db->join('jurusan', 'siswa.id_jurusan = jurusan.id_jurusan');
+        $this->db->join('kelas', 'siswa.id_kelas = kelas.id_kelas');
+        $this->db->where($where);
+        $this->db->order_by('`presensi`.`id_presensi`', 'DESC');
+        return $this->db->get()->result_array();
     }
 }
 ```
@@ -510,24 +805,233 @@ File: `application/views/scan.php`
 ```html
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Scan</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="assets/AdminLTE-3.2.0/plugins/fontawesome-free/css/all.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="assets/AdminLTE-3.2.0/dist/css/adminlte.min.css">
 </head>
-<body>
-    <h1>Scan Presensi</h1>
-    <form method="POST" action="<?php echo base_url('scan/check_in'); ?>">
-        <label for="id_siswa">ID Siswa:</label>
-        <input type="text" name="id_siswa" id="id_siswa" required>
-        <button type="submit">Check-in</button>
-    </form>
-    <br>
-    <form method="POST" action="<?php echo base_url('scan/check_out'); ?>">
-        <label for="id_siswa">ID Siswa:</label>
-        <input type="text" name="id_siswa" id="id_siswa" required>
-        <button type="submit">Check-out</button>
-    </form>
+
+<body class="hold-transition sidebar-mini sidebar-collapse">
+    <!-- Site wrapper -->
+    <div class="wrapper">
+        <!-- Navbar -->
+
+        <!-- /.navbar -->
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-12">
+                            <h1>Presensi Laboratorium Komputer SMAN 1 PASAWAHAN</h1>
+                        </div>
+
+                    </div>
+                </div><!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+
+                <!-- Default box -->
+                <div class="card card-primary">
+                    <!-- Block Content -->
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="text-center col-md-8 text-center">
+                                <table id="example2" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama</th>
+                                            <th>Kelas</th>
+                                            <th>Jurusan</th>
+                                            <th>Tanggal Masuk</th>
+                                            <th>Tanggal Keluar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        foreach ($presensi as $key => $value) { ?>
+
+                                            <tr style="<?= $key == 0 ? 'background-color: aquamarine;' : ''; ?>">
+                                                <td><?= $key + 1; ?></td>
+                                                <td><?= $value['nama']; ?></td>
+                                                <td><?= $value['kelas']; ?></td>
+                                                <td><?= $value['jurusan']; ?></td>
+                                                <td><?= $value['tgl_check_in'] . ' ' . $value['jam_check_in']; ?></td>
+                                                <td><?= $value['tgl_check_out'] . ' ' . $value['jam_check_out']; ?></td>
+                                            </tr>
+                                        <?php
+                                        }
+                                        ?>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama</th>
+                                            <th>Kelas</th>
+                                            <th>Jurusan</th>
+                                            <th>Tanggal Masuk</th>
+                                            <th>Tanggal Keluar</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="text-center col-md-4 text-center">
+                                <div class="text-center" style="width: 100%" id="reader"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+
+
+
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery -->
+    <script src="assets/AdminLTE-3.2.0/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="assets/AdminLTE-3.2.0/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="assets/AdminLTE-3.2.0/dist/js/adminlte.min.js"></script>
+    <script src="<?php echo base_url(); ?>assets/html5-qrcode/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        var lastResult, countResults = 0;
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // stop
+            // html5QrcodeScanner.clear();
+
+            if (decodedText !== lastResult) {
+                ++countResults;
+                lastResult = decodedText;
+
+                // Handle on success condition with the decoded text or result.
+                console.log(`Scan result: ${decodedText}`, decodedResult);
+                let nisn = 0;
+                if (decodedResult.result.format.formatName == "QR_CODE") {
+                    nisn = parseInt(decodedResult.result.text);
+
+                    if (nisn > 0) {
+
+                        console.log(nisn);
+                        $.ajax({
+                            type: "post",
+                            url: "<?= base_url('scan-action') ?>",
+                            data: {
+                                nisn: nisn
+                            },
+                            dataType: "json",
+                            beforeSend: function() {
+                                $('#modal-id').modal({
+                                    backdrop: 'static',
+                                    keyboard: false
+                                });
+                            },
+
+                            success: function(response) {
+                                let timerInterval;
+                                let table = `<table class="text-left">`;
+                                table += `<tr>`;
+                                table += `<td>NISN</td>`;
+                                table += `<td>: ` + response.nisn + `</td>`;
+                                table += `</tr>`;
+                                table += `<tr>`;
+                                table += `<td>NAMA</td>`;
+                                table += `<td>: ` + response.nama + `</td>`;
+                                table += `</tr>`;
+                                table += `</table>`;
+                                Swal.fire({
+                                    title: response.notif,
+                                    html: table,
+                                    timer: 2000,
+                                    timerProgressBar: true,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                        const timer = Swal.getPopup().querySelector("b");
+                                        timerInterval = setInterval(() => {
+                                            timer.textContent = `${Swal.getTimerLeft()}`;
+                                        }, 100);
+                                    },
+                                    willClose: () => {
+                                        clearInterval(timerInterval);
+                                    }
+                                }).then((result) => {
+                                    /* Read more about handling dismissals below */
+                                    if (result.dismiss === Swal.DismissReason.timer) {
+                                        console.log("I was closed by the timer");
+
+                                        location.reload();
+                                    }
+                                });
+                            },
+                            error: function(e) {
+                                $('#modal-id').modal('hide');
+                                alert('Error');
+                                // location.reload();
+                            },
+                        });
+                    } else {
+                        alert('null');
+                        location.reload();
+                    }
+                } else {
+                    alert('Bukan QR Code!')
+                    location.reload();
+                }
+            } else {
+                console.log('stop');
+            }
+
+        }
+
+        function onScanError(errorMessage) {
+            // handle on error condition, with error message
+
+        }
+
+        const config = {
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+            fps: 10,
+            qrbox: {
+                width: 250,
+                height: 250
+            },
+            rememberLastUsedCamera: true,
+            supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA, Html5QrcodeScanType.SCAN_TYPE_FILE],
+            showTorchButtonIfSupported: false,
+            showZoomSliderIfSupported: true,
+            defaultZoomValueIfSupported: 1,
+        };
+
+        var html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader", config);
+
+
+        // A $( document ).ready() block.
+        $(document).ready(function() {
+            html5QrcodeScanner.render(onScanSuccess, onScanError);
+        });
+    </script>
 </body>
 </html>
 ```
